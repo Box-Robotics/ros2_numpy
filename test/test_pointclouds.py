@@ -89,5 +89,13 @@ class TestPointClouds(unittest.TestCase):
 
         np.testing.assert_equal(points_arr, new_points_arr)
 
+    def test_field_access(self):
+        points_arr = self.makeArray(3)
+        cloud_msg = rnp.msgify(PointCloud2, points_arr)
+        points_xyz = rnp.point_cloud2.pointcloud2_to_array(cloud_msg, fields=['x', 'y', 'z'])
+
+        np.testing.assert_equal(points_xyz, rnp.point_cloud2.pointcloud2_to_xyz_array(cloud_msg))
+
+
 if __name__ == '__main__':
     unittest.main()

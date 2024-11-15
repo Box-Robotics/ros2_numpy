@@ -39,6 +39,7 @@ __docformat__ = "restructuredtext en"
 
 import sys
 
+import ros2_numpy
 from .registry import converts_from_numpy, converts_to_numpy
 
 import array
@@ -112,7 +113,7 @@ def dtype_to_fields(dtype):
     return fields
 
 @converts_to_numpy(PointCloud2)
-def pointcloud2_to_array(cloud_msg, squeeze=True):
+def pointcloud2_to_array(cloud_msg, squeeze=True, return_dtype_list=False):
     ''' Converts a rospy PointCloud2 message to a numpy recordarray
 
     Reshapes the returned array to have shape (height, width), even if the
@@ -133,9 +134,14 @@ def pointcloud2_to_array(cloud_msg, squeeze=True):
             fname[:len(DUMMY_FIELD_PREFIX)] == DUMMY_FIELD_PREFIX)]]
 
     if squeeze and cloud_msg.height == 1:
-        return np.reshape(cloud_arr, (cloud_msg.width,))
+        result = np.reshape(cloud_arr, (cloud_msg.width,))
     else:
-        return np.reshape(cloud_arr, (cloud_msg.height, cloud_msg.width))
+        result = np.reshape(cloud_arr, (cloud_msg.height, cloud_msg.width))
+
+    if return_dtype_list:
+        return result, dtype_list
+    else:
+        return result
 
 @converts_from_numpy(PointCloud2)
 def array_to_pointcloud2(cloud_arr, stamp=None, frame_id=None):
@@ -247,25 +253,29 @@ def split_rgb_field(cloud_arr):
             new_cloud_arr[field_name] = cloud_arr[field_name]
     return new_cloud_arr
 
-def get_xyz_points(cloud_array, remove_nans=True, dtype=float):
-    '''Pulls out x, y, and z columns from the cloud recordarray, and returns
-    a 3xN matrix.
+def get_points(cloud_array, fields, remove_nans=True):
+    '''Pulls out fields from the cloud recordarray, and returns
+    a len(fields)xN matrix.
     '''
     # remove crap points
     if remove_nans:
-        mask = np.isfinite(cloud_array['x']) & \
-               np.isfinite(cloud_array['y']) & \
-               np.isfinite(cloud_array['z'])
+        mask = np.all([np.isfinite(cloud_array[fname]) for fname in fields], axis=0)
         cloud_array = cloud_array[mask]
 
-    # pull out x, y, and z values
-    points = np.zeros(cloud_array.shape + (3,), dtype=dtype)
-    points[...,0] = cloud_array['x']
-    points[...,1] = cloud_array['y']
-    points[...,2] = cloud_array['z']
+    # pull out values and return points in [fname, n_points] shape
+    points = np.stack([cloud_array[fname] for fname in fields], axis=1)
 
     return points
 
+def pointcloud2_to_array(cloud_msg, fields=None, remove_nans=True):
+    points, dtype_list = ros2_numpy.numpify(cloud_msg, squeeze=True, return_dtype_list=True)
+
+    if not fields:
+        fields = [fname for fname, _type in dtype_list]
+
+    return get_points(points, fields, remove_nans=remove_nans)
+
 def pointcloud2_to_xyz_array(cloud_msg, remove_nans=True):
-    return get_xyz_points(
-        pointcloud2_to_array(cloud_msg), remove_nans=remove_nans)
+    points = ros2_numpy.numpify(cloud_msg, squeeze=True, return_dtype_list=False)
+    fields = ['x', 'y', 'z']
+    return get_points(points, fields, remove_nans=remove_nans)

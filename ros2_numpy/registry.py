@@ -35,6 +35,8 @@ def numpify(msg, *args, **kwargs):
                           for cls, pl in _to_numpy.keys())
         ))
 
+    print(*args)
+
     return conv(msg, *args, **kwargs)
 
 def msgify(msg_type, numpy_obj, *args, **kwargs):
