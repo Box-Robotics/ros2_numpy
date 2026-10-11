@@ -110,7 +110,7 @@ def numpy_to_image(arr, encoding):
 
     # make the array contiguous in memory, as mostly required by the format
     contig = np.ascontiguousarray(arr)
-    im.data = contig.tostring()
+    im.data = contig.tobytes()
     im.step = contig.strides[0]
     im.is_bigendian = (
         arr.dtype.byteorder == '>' or
