@@ -2,17 +2,20 @@
 Changelog for package ros2_numpy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.13 (2026-10-11)
+-------------------
+* Fixes tostring() deprecation in numpy (`#13 <https://github.com/Box-Robotics/ros2_numpy/pull/13>`_)
+* Contributors: hello-robot-shehab
+
 2.0.12 (2024-11-11)
 -------------------
 * Adds support for LaserScan messages (`#12 <https://github.com/Box-Robotics/ros2_numpy/pull/12>`_)
 * Contributors: Aniketh Seelam
 
-
 2.0.11 (2024-06-25)
 ------------------
 * Removed dependency on nose
 * Contributors: Tom Panzarella
-
 
 2.0.9 (2023-01-03)
 ------------------
@@ -34,12 +37,10 @@ Changelog for package ros2_numpy
 * Improve speed of msgify(point_cloud_2_np) by 115x (`#3 <https://github.com/Box-Robotics/ros2_numpy/pull/3>`_)
 * Contributors: Alex Thiel
 
-
 2.0.5 (2022-02-24)
 ------------------
 * Ported to `tf_transformations <https://github.com/DLu/tf_transformations>`_
 * Contributors: Tom Panzarella
-
 
 2.0.4 (2021-11-02)
 ------------------
@@ -47,7 +48,6 @@ Changelog for package ros2_numpy
 * Added a test case for the quaternion convention
 * Fixed rosdep dependencies in package.xml
 * Contributors: Asil Orgen, Tom Panzarella
-
 
 2.0.3 (2020-07-12)
 ------------------
