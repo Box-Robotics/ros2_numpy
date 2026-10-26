@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import ros2_numpy as rnp
 from nav_msgs.msg import OccupancyGrid, MapMetaData
-from rclpy.serialization import serialize_message
+from rclpy.serialization import deserialize_message, serialize_message
 
 class TestOccupancyGrids(unittest.TestCase):
     def test_masking(self):
@@ -31,12 +31,15 @@ class TestOccupancyGrids(unittest.TestCase):
 
         self.assertEqual(msg.info, msg2.info)
 
+        # Compare the deserialized messages instead of the raw bytes, because the
+        # CDR alignment padding is not initialized by the serializer and
+        # therefore contains arbitrary heap contents.
         msg_ser = serialize_message(msg)
         msg2_ser = serialize_message(msg2)
 
         self.assertEqual(
-            msg_ser,
-            msg2_ser,
+            deserialize_message(msg_ser, OccupancyGrid),
+            deserialize_message(msg2_ser, OccupancyGrid),
             "Message serialization survives round-trip")
 
 if __name__ == '__main__':
